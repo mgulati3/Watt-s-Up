@@ -30,7 +30,7 @@ This project was bootstrapped with Create React App. Follow the steps below to s
 To run the app in development mode, use the following command. (If using Node 20 or later, the legacy OpenSSL setting is required.)
 
 ```bash
-NODE_OPTIONS=--openssl-legacy-provider npm start
+npm start
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to view the application. The page will reload with any code changes, and you can view lint errors or warnings in the console.
