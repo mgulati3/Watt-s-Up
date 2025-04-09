@@ -527,11 +527,6 @@ export default function WattsUpApp() {
               </h3>
               <p className="text-sm text-gray-500">Smart Energy Usage Estimator</p>
             </div>
-            <div>
-              <p className="text-sm text-gray-500">
-                © {new Date().getFullYear()} Watt's Up. All rights reserved.
-              </p>
-            </div>
           </div>
         </div>
       </footer>
