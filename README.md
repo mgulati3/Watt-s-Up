@@ -46,7 +46,7 @@ npm run build
 This command uses the legacy OpenSSL provider via:
 
 ```json
-"build": "NODE_OPTIONS=--openssl-legacy-provider react-scripts build"
+"build": "npm start"
 ```
 
 The build artifacts will be stored in the `build` folder. You can serve it locally with:
