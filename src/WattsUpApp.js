@@ -1,8 +1,26 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+/**
+ * WattsUpApp.jsx
+ *
+ * A React application to estimate household energy usage.
+ * It allows users to add appliances, calculate their daily energy consumption (in kWh),
+ * compare their usage to the U.S. average, and receive energy-saving tips.
+ *
+ * Features:
+ * - Add appliances with configurable power (watts) and daily hours of use.
+ * - Display a summary of your energy usage.
+ * - Compare your usage to an average U.S. household.
+ * - Save and load data from localStorage.
+ * - Provide dynamic energy-saving tips.
+ *
+ * Author: Manan Gulati 
+ * Date: 9th May 2025
+ */
+
+import React, { useState, useEffect } from 'react';
+// Import icons from lucide-react for a modern UI
 import { Lightbulb, Trash2, PlusCircle, Save, RefreshCw } from 'lucide-react';
 
-// Common appliances with their average wattage
+// Constant list of common appliances and their average wattage
 const APPLIANCES = [
   { name: 'Refrigerator', watts: 150 },
   { name: 'AC/Heater', watts: 1500 },
@@ -26,10 +44,10 @@ const APPLIANCES = [
   { name: 'Other', watts: 0 }
 ];
 
-// U.S. average daily household electricity consumption (kWh)
+// U.S. average daily household electricity consumption in kWh for comparison
 const US_AVERAGE_KWH = 30;
 
-// Energy-saving tips
+// A list of energy-saving tips to show the user
 const ENERGY_TIPS = [
   "Replace incandescent bulbs with LED bulbs to save up to 80% energy on lighting.",
   "Unplug devices when not in use to eliminate 'phantom' energy use.",
@@ -44,48 +62,77 @@ const ENERGY_TIPS = [
 ];
 
 export default function WattsUpApp() {
+  // State for list of appliances usage items
   const [usageItems, setUsageItems] = useState([]);
+
+  // States to track form input values for new appliances
   const [newAppliance, setNewAppliance] = useState('Refrigerator');
   const [newWatts, setNewWatts] = useState(150);
   const [newHours, setNewHours] = useState(24);
+
+  // State for total energy consumption (kWh), comparison percentage, and a random energy tip
   const [totalKwh, setTotalKwh] = useState(0);
   const [comparisonPercentage, setComparisonPercentage] = useState(0);
   const [randomTip, setRandomTip] = useState('');
+
+  // State for controlling active tabs in the application (calculator, insights, learn)
   const [activeTab, setActiveTab] = useState('calculator');
+
+  // State to show a "saved" indicator after saving data to localStorage
   const [isSaved, setIsSaved] = useState(false);
 
-  // Load saved data and a random tip on initial render
+  /**
+   * useEffect hook - Loads saved usage data from localStorage 
+   * and sets a random energy-saving tip when the component mounts.
+   */
   useEffect(() => {
     const savedData = localStorage.getItem('wattsUpData');
     if (savedData) {
       setUsageItems(JSON.parse(savedData));
     }
-    setRandomTip(ENERGY_TIPS[Math.floor(Math.random() * ENERGY_TIPS.length)]);
+    const randomIndex = Math.floor(Math.random() * ENERGY_TIPS.length);
+    setRandomTip(ENERGY_TIPS[randomIndex]);
   }, []);
 
-  // Update calculations when usageItems change
+  /**
+   * useEffect hook - Recalculates total energy usage (in kWh)
+   * and updates the comparison percentage each time the usageItems array changes.
+   */
   useEffect(() => {
-    const total = usageItems.reduce((sum, item) => sum + (item.watts * item.hours) / 1000, 0);
+    // Calculate total energy consumption in kWh for the day
+    const total = usageItems.reduce(
+      (sum, item) => sum + (item.watts * item.hours) / 1000,
+      0
+    );
     setTotalKwh(total);
+    // Calculate how the user's energy usage compares to the U.S. average
     setComparisonPercentage((total / US_AVERAGE_KWH) * 100);
+    // Reset saved indicator on data change
     setIsSaved(false);
   }, [usageItems]);
 
-  // Add a new appliance
+  /**
+   * Event handler to add a new appliance to the usage list.
+   * It prevents the default form submission, creates a new usage item,
+   * and resets the hours input field.
+   */
   const handleAddAppliance = (e) => {
     e.preventDefault();
     const newItem = {
-      id: Date.now(),
+      id: Date.now(), // Unique identifier based on timestamp
       name: newAppliance,
-      watts: parseInt(newWatts),
+      watts: parseInt(newWatts, 10),
       hours: parseFloat(newHours),
-      kWh: (parseInt(newWatts) * parseFloat(newHours)) / 1000
+      kWh: (parseInt(newWatts, 10) * parseFloat(newHours)) / 1000
     };
     setUsageItems([...usageItems, newItem]);
-    setNewHours(24);
+    setNewHours(24); // Reset hours input to default value after adding
   };
 
-  // Update the selected appliance and corresponding wattage
+  /**
+   * Event handler to update appliance selection.
+   * It sets the new appliance name and updates its corresponding wattage.
+   */
   const handleApplianceChange = (e) => {
     const selected = e.target.value;
     setNewAppliance(selected);
@@ -93,25 +140,39 @@ export default function WattsUpApp() {
     setNewWatts(appliance ? appliance.watts : 0);
   };
 
-  // Delete an appliance from the usage list
+  /**
+   * Removes a selected appliance from the usage list.
+   *
+   * @param {number} id - The unique identifier of the appliance to delete.
+   */
   const handleDeleteItem = (id) => {
     setUsageItems(usageItems.filter(item => item.id !== id));
   };
 
-  // Get a new random energy tip
+  /**
+   * Randomly selects and sets a new energy-saving tip.
+   */
   const getNewTip = () => {
-    const newTip = ENERGY_TIPS[Math.floor(Math.random() * ENERGY_TIPS.length)];
-    setRandomTip(newTip);
+    const randomIndex = Math.floor(Math.random() * ENERGY_TIPS.length);
+    setRandomTip(ENERGY_TIPS[randomIndex]);
   };
 
-  // Save data to localStorage
+  /**
+   * Saves the current usage data to localStorage and shows a "saved" indicator.
+   */
   const saveData = () => {
     localStorage.setItem('wattsUpData', JSON.stringify(usageItems));
     setIsSaved(true);
+    // Hide the "saved" indicator after 3 seconds
     setTimeout(() => setIsSaved(false), 3000);
   };
 
-  // Helper function for efficiency display
+  /**
+   * Helper function to return a CSS class based on the energy efficiency level.
+   * It uses the comparison percentage to determine styling.
+   *
+   * @returns {string} A string representing Tailwind CSS classes.
+   */
   const getEfficiencyClass = () => {
     if (comparisonPercentage <= 50) return "text-green-500";
     if (comparisonPercentage <= 80) return "text-green-400";
@@ -121,7 +182,7 @@ export default function WattsUpApp() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Header Section */}
       <header className="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -131,6 +192,7 @@ export default function WattsUpApp() {
               </h1>
               <p className="text-blue-100">Smart Energy Usage Estimator</p>
             </div>
+            {/* Navigation Tabs */}
             <nav className="flex items-center space-x-4">
               <button 
                 onClick={() => setActiveTab('calculator')}
@@ -164,15 +226,15 @@ export default function WattsUpApp() {
               </button>
             </nav>
           </div>
-          {/* Removed mobile nav block to avoid duplicate navigation */}
         </div>
       </header>
       
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
+        {/* Calculator Tab */}
         {activeTab === 'calculator' && (
           <section className="space-y-8">
-            {/* Add Appliance Form */}
+            {/* Appliance Input Form */}
             <div className="bg-white rounded-xl shadow-md p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-800">Add Your Appliances</h2>
@@ -197,6 +259,7 @@ export default function WattsUpApp() {
               </div>
               <form onSubmit={handleAddAppliance} className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Appliance Selection */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Appliance</label>
                     <select 
@@ -211,6 +274,7 @@ export default function WattsUpApp() {
                       ))}
                     </select>
                   </div>
+                  {/* Power Input */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Power (Watts)</label>
                     <input 
@@ -221,6 +285,7 @@ export default function WattsUpApp() {
                       className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition"
                     />
                   </div>
+                  {/* Hours Input */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Hours Used Per Day</label>
                     <input 
@@ -244,7 +309,7 @@ export default function WattsUpApp() {
               </form>
             </div>
             
-            {/* Usage List */}
+            {/* Energy Usage List */}
             <div className="bg-white rounded-xl shadow-md p-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Your Energy Usage</h2>
               {usageItems.length === 0 ? (
@@ -296,12 +361,13 @@ export default function WattsUpApp() {
           </section>
         )}
 
+        {/* Insights Tab */}
         {activeTab === 'insights' && (
           <section className="space-y-8">
             {usageItems.length > 0 ? (
               <>
-                {/* Comparison to Average and Energy Saving Tip */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Comparison Section */}
                   <div className="bg-white rounded-xl shadow-md p-6">
                     <h2 className="text-xl font-semibold text-gray-800 mb-4">How You Compare</h2>
                     <div className="flex items-center mb-4">
@@ -330,7 +396,7 @@ export default function WattsUpApp() {
                           </>
                         ) : comparisonPercentage <= 80 ? (
                           <>
-                            <span role="img" aria-label="Good">👍</span> Good! Your usage is below average
+                            <span role="img" aria-label="Good">👍</span> Good! Your usage is below average.
                           </>
                         ) : comparisonPercentage <= 120 ? (
                           <>
@@ -345,6 +411,7 @@ export default function WattsUpApp() {
                     </div>
                   </div>
                   
+                  {/* Energy Saving Tip Section */}
                   <div className="bg-white rounded-xl shadow-md p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-xl font-semibold text-gray-800">Energy Saving Tip</h2>
@@ -366,6 +433,7 @@ export default function WattsUpApp() {
                 </div>
               </>
             ) : (
+              // Show message when there is no energy usage data yet
               <div className="bg-white rounded-xl shadow-md p-6 text-center">
                 <div className="py-10">
                   <h2 className="text-xl font-semibold text-gray-800 mb-3">No Data Yet</h2>
@@ -384,11 +452,13 @@ export default function WattsUpApp() {
           </section>
         )}
 
+        {/* Learn Tab */}
         {activeTab === 'learn' && (
           <section className="space-y-8">
             <div className="bg-white rounded-xl shadow-md p-6">
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">Understanding Energy Consumption</h2>
               <div className="space-y-6">
+                {/* Kilowatt-Hour Explanation */}
                 <div className="bg-blue-50 p-5 rounded-lg">
                   <h3 className="font-semibold text-lg text-blue-800 mb-2">What is a Kilowatt-Hour (kWh)?</h3>
                   <p className="text-gray-700">
@@ -399,6 +469,7 @@ export default function WattsUpApp() {
                     <p className="font-mono mt-1">kWh = (Power in Watts × Hours of Use) ÷ 1,000</p>
                   </div>
                 </div>
+                {/* Energy Conversion Explanation */}
                 <div>
                   <h3 className="font-semibold text-lg text-gray-800 mb-2">Energy Conversion and Efficiency</h3>
                   <p className="text-gray-600 mb-3">
@@ -425,6 +496,7 @@ export default function WattsUpApp() {
                     </div>
                   </div>
                 </div>
+                {/* Energy Efficiency Explanation */}
                 <div className="bg-gray-50 p-5 rounded-lg">
                   <h3 className="font-semibold text-lg text-gray-800 mb-2">Why Does Energy Efficiency Matter?</h3>
                   <p className="text-gray-600 mb-3">
@@ -445,7 +517,7 @@ export default function WattsUpApp() {
         )}
       </main>
       
-      {/* Footer */}
+      {/* Footer Section */}
       <footer className="mt-8 bg-gray-100 border-t border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
