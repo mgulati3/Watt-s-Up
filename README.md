@@ -2,6 +2,9 @@
 
 Watt's Up? is an interactive energy usage estimator that helps you understand and manage your household energy consumption. By allowing users to input data for common appliances and their usage patterns, Watt's Up? performs order-of-magnitude estimates to calculate daily energy usage and compares it to national averages. The app also provides practical energy-saving tips and insights to empower users with a scientific approach to energy efficiency. Built with React and styled using Tailwind CSS, the project demonstrates how everyday science can inform sustainable energy practices.
 
+## Link to the Site
+https://watts-up.netlify.app/
+
 ## Getting Started
 
 This project was bootstrapped with Create React App. Follow the steps below to set up the project on your local machine.
